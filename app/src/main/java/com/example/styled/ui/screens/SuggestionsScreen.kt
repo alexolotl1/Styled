@@ -51,6 +51,10 @@ import com.example.styled.data.ClothingItem
 import com.example.styled.data.OutfitSuggestion
 import com.example.styled.data.ShoppingSuggestion
 import com.example.styled.ui.viewmodel.SuggestionsViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +82,30 @@ fun SuggestionsScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            if (selectedTab.value == 0) {
+                                viewModel.regenerateOutfits()
+                            } else {
+                                viewModel.regenerateShopping()
+                            }
+                        },
+                        enabled = !uiState.value.isRegenerating
+                    ) {
+                        if (uiState.value.isRegenerating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.height(20.dp).width(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Regenerate suggestions"
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface

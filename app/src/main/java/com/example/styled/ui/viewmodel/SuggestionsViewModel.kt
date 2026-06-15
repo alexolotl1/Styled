@@ -67,13 +67,16 @@ class SuggestionsViewModel : ViewModel() {
                 LocalSecrets.GROQ_API_KEY
             }
 
-            if (groqApiKey.isBlank()) return@launch
+            if (groqApiKey.isBlank()) {
+                _uiState.value = _uiState.value.copy(isRegenerating = false)
+                return@launch
+            }
 
             val result = GroqApiClient.generateOutfitSuggestions(items, groqApiKey)
             result.onSuccess { suggestions ->
-                _uiState.value = _uiState.value.copy(outfitSuggestions = suggestions)
+                _uiState.value = _uiState.value.copy(outfitSuggestions = suggestions, isRegenerating = false)
             }.onFailure { e ->
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.value = _uiState.value.copy(isLoading = false, isRegenerating = false)
             }
         }
     }
@@ -86,16 +89,20 @@ class SuggestionsViewModel : ViewModel() {
                 LocalSecrets.GROQ_API_KEY
             }
 
-            if (groqApiKey.isBlank()) return@launch
+            if (groqApiKey.isBlank()) {
+                _uiState.value = _uiState.value.copy(isLoading = false, isRegenerating = false)
+                return@launch
+            }
 
             val result = GroqApiClient.generateShoppingSuggestions(items, groqApiKey)
             result.onSuccess { suggestions ->
                 _uiState.value = _uiState.value.copy(
                     shoppingSuggestions = suggestions,
-                    isLoading = false
+                    isLoading = false,
+                    isRegenerating = false
                 )
             }.onFailure { e ->
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.value = _uiState.value.copy(isLoading = false, isRegenerating = false)
             }
         }
     }
@@ -104,6 +111,13 @@ class SuggestionsViewModel : ViewModel() {
         if (_uiState.value.clothingItems.isNotEmpty()) {
             _uiState.value = _uiState.value.copy(isRegenerating = true)
             generateOutfitSuggestions(_uiState.value.clothingItems.values.toList())
+        }
+    }
+
+    fun regenerateShopping() {
+        if (_uiState.value.clothingItems.isNotEmpty()) {
+            _uiState.value = _uiState.value.copy(isRegenerating = true)
+            generateShoppingSuggestions(_uiState.value.clothingItems.values.toList())
         }
     }
 
